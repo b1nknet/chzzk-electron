@@ -1,5 +1,5 @@
 const channelList = document.getElementById('channel-list');
-const addModal = document.getElementById('add-modal');
+const addBar = document.getElementById('add-bar');
 const channelInput = document.getElementById('channel-input');
 const addError = document.getElementById('add-error');
 const refreshBtn = document.getElementById('refresh-btn');
@@ -445,23 +445,39 @@ function startTick() {
   }, 1000);
 }
 
-// --- add channel modal ---------------------------------------------------
+// --- add channel bar -----------------------------------------------------
+
+function closeAddBar() {
+  addBar.classList.add('hidden');
+  addError.classList.add('hidden');
+}
 
 document.getElementById('add-btn').addEventListener('click', () => {
+  // Toggle the inline input bar below the titlebar.
+  if (!addBar.classList.contains('hidden')) {
+    closeAddBar();
+    return;
+  }
   addError.classList.add('hidden');
   channelInput.value = '';
-  addModal.classList.remove('hidden');
+  addBar.classList.remove('hidden');
   setTimeout(() => channelInput.focus(), 50);
 });
 
-document.getElementById('add-cancel-btn').addEventListener('click', () => {
-  addModal.classList.add('hidden');
-});
+document.getElementById('add-cancel-btn').addEventListener('click', closeAddBar);
+
+// Chzzk channel ids are 32-char lowercase hex strings.
+const CHANNEL_ID_PATTERN = /^[a-z0-9]{32}$/;
 
 async function confirmAdd() {
   const id = extractChannelId(channelInput.value);
   if (!id) {
     addError.textContent = '올바른 채널 ID 또는 URL을 입력하세요.';
+    addError.classList.remove('hidden');
+    return;
+  }
+  if (!CHANNEL_ID_PATTERN.test(id)) {
+    addError.textContent = '채널 ID는 32자리 영소문자·숫자여야 합니다.';
     addError.classList.remove('hidden');
     return;
   }
@@ -488,7 +504,7 @@ async function confirmAdd() {
 
   channels.push(id);
   await window.chzzk.saveChannels(channels);
-  addModal.classList.add('hidden');
+  closeAddBar();
   await refreshNow();
 }
 
@@ -496,7 +512,7 @@ document.getElementById('add-confirm-btn').addEventListener('click', confirmAdd)
 
 channelInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') confirmAdd();
-  if (e.key === 'Escape') addModal.classList.add('hidden');
+  if (e.key === 'Escape') closeAddBar();
 });
 
 // --- titlebar + opacity --------------------------------------------------
