@@ -1,7 +1,7 @@
 const channelList = document.getElementById('channel-list');
 const addBar = document.getElementById('add-bar');
 const channelInput = document.getElementById('channel-input');
-const errorToast = document.getElementById('error-toast');
+const errorBanner = document.getElementById('error-banner');
 const refreshBtn = document.getElementById('refresh-btn');
 const countdownEl = document.getElementById('countdown');
 const appEl = document.getElementById('app');
@@ -447,18 +447,18 @@ function startTick() {
 
 // --- add channel bar -----------------------------------------------------
 
-// Error popup centered over the whole window; auto-hides after a few seconds.
-let errorToastTimer = null;
+// Error banner between the titlebar and the input bar; auto-hides after a few seconds.
+let errorBannerTimer = null;
 function showAddError(msg) {
-  errorToast.textContent = msg;
-  errorToast.classList.remove('hidden');
-  clearTimeout(errorToastTimer);
-  errorToastTimer = setTimeout(() => errorToast.classList.add('hidden'), 3500);
+  errorBanner.textContent = msg;
+  errorBanner.classList.remove('hidden');
+  clearTimeout(errorBannerTimer);
+  errorBannerTimer = setTimeout(() => errorBanner.classList.add('hidden'), 3500);
 }
 
 function hideAddError() {
-  errorToast.classList.add('hidden');
-  clearTimeout(errorToastTimer);
+  errorBanner.classList.add('hidden');
+  clearTimeout(errorBannerTimer);
 }
 
 function closeAddBar() {
