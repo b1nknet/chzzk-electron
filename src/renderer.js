@@ -143,17 +143,24 @@ function wireCard(card, info) {
 function setupMarquee(el, withTitle = true) {
   if (!el) return;
   const text = el.textContent;
-  el.innerHTML = `<span class="marquee-track">${escapeHtml(text)}</span>`;
+  el.innerHTML = `<span class="marquee-track"><span class="marquee-seg">${escapeHtml(text)}</span></span>`;
   requestAnimationFrame(() => {
     const track = el.querySelector('.marquee-track');
-    if (!track) return;
-    const overflow = track.scrollWidth - el.clientWidth;
+    const seg = el.querySelector('.marquee-seg');
+    if (!track || !seg) return;
+    const overflow = seg.scrollWidth - el.clientWidth;
     if (overflow > 2) {
-      const distance = overflow + 6;
+      // One-directional seamless loop: a second copy follows the first, and the
+      // track scrolls left by exactly one copy+gap so the wrap is invisible.
+      const gap = 40;
+      const distance = seg.scrollWidth + gap;
+      const copy = seg.cloneNode(true);
+      copy.setAttribute('aria-hidden', 'true');
+      track.appendChild(copy);
       el.classList.add('marquee');
       el.style.setProperty('--marquee-shift', `-${distance}px`);
-      // ~28px/sec so longer text scrolls proportionally longer.
-      el.style.setProperty('--marquee-dur', `${Math.max(4, distance / 28)}s`);
+      // ~28px/sec scroll, plus the 18% start-hold from the keyframes.
+      el.style.setProperty('--marquee-dur', `${Math.max(5, distance / 28 / 0.82)}s`);
       if (withTitle) el.title = text;
     } else {
       el.classList.remove('marquee');

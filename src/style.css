@@ -295,28 +295,41 @@ html, body {
 }
 
 .channel-title {
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 /* Horizontal auto-scroll for overflowing names / titles. The .marquee class
-   is added by JS only when the text actually overflows its container. */
+   is added by JS only when the text actually overflows its container. A second
+   copy of the text (added by JS) makes the leftward loop seamless. */
 .marquee-track {
-  display: inline-block;
+  display: inline-flex;
   white-space: nowrap;
 }
 
+.marquee-seg {
+  display: inline-block;
+}
+
+.marquee-seg + .marquee-seg {
+  margin-left: 40px; /* gap between the looping copies; matches JS `gap` */
+}
+
 .marquee .marquee-track {
-  animation: marquee-scroll var(--marquee-dur, 8s) linear infinite alternate;
+  animation: marquee-scroll var(--marquee-dur, 8s) linear infinite;
+  /* Keep the moving copies from stealing the hover target so the native
+     title tooltip stays anchored to the (stationary) container. */
+  pointer-events: none;
 }
 
 @keyframes marquee-scroll {
-  0%, 12%   { transform: translateX(0); }
-  88%, 100% { transform: translateX(var(--marquee-shift, 0)); }
+  0%, 18%  { transform: translateX(0); }
+  100%     { transform: translateX(var(--marquee-shift, 0)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -325,8 +338,9 @@ html, body {
 
 .channel-meta {
   display: flex;
-  gap: 8px;
-  margin-top: 3px;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
   font-size: 11px;
   color: var(--muted);
 }
@@ -334,6 +348,19 @@ html, body {
 .viewer-count {
   color: var(--accent);
   font-weight: 600;
+}
+
+/* Category chip — the unclassed span in .channel-meta */
+.channel-meta span:not(.viewer-count) {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .channel-duration {
