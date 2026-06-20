@@ -563,6 +563,12 @@ html, body {
   color: var(--text);
 }
 
+/* Sort toggle active state */
+#sort-btn.active {
+  background: rgba(0, 196, 113, 0.18);
+  color: var(--text);
+}
+
 /* More menu */
 #more-menu {
   position: absolute;
