@@ -32,6 +32,7 @@ const DEFAULT_SETTINGS = {
   opacity: 1,
   alwaysOnTop: true,
   hideOffline: false,
+  favorites: [], // channel ids pinned to a separate group at the top
   sortByLiveTime: false, // order live channels by start time, offline by end time
   viewMode: 'list', // 'list' | 'grid'
   uiScale: 1, // webContents zoom factor for the whole interface
@@ -273,11 +274,14 @@ ipcMain.handle('export-channels', async () => {
     filters: [{ name: 'JSON', extensions: ['json'] }],
   });
   if (canceled || !filePath) return { ok: false, canceled: true };
+  const channels = loadChannels();
+  const favorites = (loadSettings().favorites || []).filter(id => channels.includes(id));
   const payload = {
     type: 'chzzk-widget-channels',
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
-    channels: loadChannels(),
+    channels,
+    favorites,
   };
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
   return { ok: true, filePath, count: payload.channels.length };
@@ -296,7 +300,11 @@ ipcMain.handle('import-channels', async () => {
     const list = Array.isArray(raw) ? raw : raw.channels;
     if (!Array.isArray(list)) return { ok: false, error: '잘못된 파일 형식입니다.' };
     const channels = [...new Set(list.filter(id => typeof id === 'string' && /^[a-zA-Z0-9]+$/.test(id)))];
-    return { ok: true, channels };
+    // Favorites are optional (absent on bare arrays / v1 files); keep only ids
+    // that are actually part of the imported channel list.
+    const favSrc = Array.isArray(raw?.favorites) ? raw.favorites : [];
+    const favorites = [...new Set(favSrc.filter(id => /^[a-zA-Z0-9]+$/.test(id) && channels.includes(id)))];
+    return { ok: true, channels, favorites };
   } catch (err) {
     return { ok: false, error: err.message };
   }
