@@ -10,6 +10,7 @@ const opacityValue = document.getElementById('opacity-value');
 const scaleMinus = document.getElementById('scale-minus');
 const scaleValue = document.getElementById('scale-value');
 const scalePlus = document.getElementById('scale-plus');
+const sortBtn = document.getElementById('sort-btn');
 const viewBtn = document.getElementById('view-btn');
 const moreBtn = document.getElementById('more-btn');
 const moreMenu = document.getElementById('more-menu');
@@ -22,6 +23,7 @@ const currentVersionEl = document.getElementById('current-version');
 
 let alwaysOnTop = true;
 let hideOffline = false;
+let sortByLiveTime = false; // order live by start time, offline by end time
 let viewMode = 'list'; // 'list' | 'grid'
 
 // Interface zoom levels cycled by the footer scale button.
@@ -169,10 +171,23 @@ function setupMarquee(el, withTitle = true) {
   });
 }
 
+// Order infos by broadcast time: live (most recently started) first, then
+// offline (most recently ended) first. Null/unparseable dates sink within
+// their group. Returns a new array; does not mutate the input.
+function sortInfos(infos) {
+  const byTime = (a, b) => (b ?? -Infinity) - (a ?? -Infinity);
+  const live = infos.filter(i => i.isLive)
+    .sort((a, b) => byTime(parseKst(a.openDate), parseKst(b.openDate)));
+  const offline = infos.filter(i => !i.isLive)
+    .sort((a, b) => byTime(parseKst(a.closeDate), parseKst(b.closeDate)));
+  return [...live, ...offline];
+}
+
 // Apply the current view-mode + hide-offline filter to lastInfos and draw.
 function render() {
   hideTooltip();
   const visible = hideOffline ? lastInfos.filter(i => i.isLive) : lastInfos;
+  const ordered = sortByLiveTime ? sortInfos(visible) : visible;
   const useGrid = viewMode === 'grid' && visible.length > 0;
   channelList.classList.toggle('grid-view', useGrid);
   channelList.innerHTML = '';
@@ -194,15 +209,15 @@ function render() {
     return;
   }
 
-  if (viewMode === 'grid') renderGrid(visible);
-  else renderList(visible);
+  if (viewMode === 'grid') renderGrid(ordered);
+  else renderList(ordered);
 }
 
 function renderList(infos) {
   for (const info of infos) {
     const card = document.createElement('div');
     card.className = 'channel-card';
-    card.draggable = true;
+    card.draggable = !sortByLiveTime;
 
     const openMs = parseKst(info.openDate);
     const closeMs = parseKst(info.closeDate);
@@ -247,7 +262,7 @@ function renderList(infos) {
     }
 
     wireCard(card, info);
-    attachDragHandlers(card);
+    if (!sortByLiveTime) attachDragHandlers(card);
     channelList.appendChild(card);
     refreshDurationText(card);
     setupMarquee(card.querySelector('.channel-name'));
@@ -604,11 +619,23 @@ function applyViewState() {
   menuHideOffline.classList.toggle('active', hideOffline);
 }
 
+function applySortState() {
+  sortBtn.classList.toggle('active', sortByLiveTime);
+  sortBtn.title = sortByLiveTime ? '정렬 해제 (원래 순서)' : '방송 시간순 정렬';
+}
+
 viewBtn.addEventListener('click', async () => {
   viewMode = viewMode === 'grid' ? 'list' : 'grid';
   applyViewState();
   render();
   await window.chzzk.setSettings({ viewMode });
+});
+
+sortBtn.addEventListener('click', async () => {
+  sortByLiveTime = !sortByLiveTime;
+  applySortState();
+  render();
+  await window.chzzk.setSettings({ sortByLiveTime });
 });
 
 menuHideOffline.addEventListener('click', async () => {
@@ -820,6 +847,9 @@ async function init() {
   hideOffline = settings.hideOffline ?? false;
   viewMode = settings.viewMode ?? 'list';
   applyViewState();
+
+  sortByLiveTime = settings.sortByLiveTime ?? false;
+  applySortState();
 
   channels = await window.chzzk.getChannels();
   updateCountdownDisplay();
