@@ -813,6 +813,11 @@ document.getElementById('menu-import').addEventListener('click', async () => {
   for (const id of r.channels) if (!merged.includes(id)) merged.push(id);
   channels = merged;
   await window.chzzk.saveChannels(channels);
+  // Merge imported favorites (only for channels we now have).
+  if (r.favorites?.length) {
+    favorites = [...new Set([...favorites, ...r.favorites.filter(id => channels.includes(id))])];
+    await window.chzzk.setSettings({ favorites });
+  }
   await refreshNow();
   showBanner(`${channels.length - before}개 채널을 가져왔습니다`, false, 3000);
 });
