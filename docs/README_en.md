@@ -16,17 +16,23 @@ platform) channels at a glance. Built with Electron. The interface is in Korean.
   "종료" (ended) timer.
 - **List & grid views** — a detailed list, or a compact icon grid with a hover
   tooltip. Toggle with the titlebar button.
+- **Favorites** — right‑click a card to pin a channel to a separate group at the
+  top. Favorites are always shown, regardless of the hide‑offline setting.
+- **Sort by broadcast time** — the titlebar ↕ button orders live channels by
+  start time and offline channels by end time (manual drag is disabled while
+  sorting is on).
 - **Add by ID or URL** — paste a channel ID or any `chzzk.naver.com/…`,
   `…/live/…`, or `…/video/…` link.
 - **One‑click open** — clicking a card opens the channel; live channels jump
   straight to the player at `/live/<id>`.
-- **Drag‑and‑drop reordering** and per‑channel removal.
+- **Drag‑and‑drop reordering** and per‑channel removal, plus a "remove all
+  channels" option in the ⋯ menu with an in‑app confirm dialog.
 - **Auto‑refresh** every 30 seconds, with a combined refresh button + countdown.
 - **Hide offline channels** to keep only what's live.
 - **Adjustable appearance** — opacity slider (fully opaque at 100%), interface
   scale (− / +), and an always‑on‑top toggle.
-- **Import / export** your channel list as JSON (export filenames are
-  timestamped).
+- **Import / export** your channel list and favorites as JSON (export filenames
+  are timestamped).
 - **Auto‑update** — installed builds update themselves from GitHub Releases.
 
 ## Download
@@ -47,9 +53,13 @@ Builds are **unsigned**, so the OS will warn on first launch:
 
 1. Launch the app — a compact widget window appears, pinned on top.
 2. Click **+** in the titlebar and paste a channel ID or URL to add a channel.
-3. Click a channel to open it in your browser. Drag cards to reorder.
-4. Use the **⋯** menu for always‑on‑top, hiding offline channels, import/export,
-   and manual update checks. Adjust opacity and UI scale from the footer.
+3. Click a channel to open it in your browser. Drag cards to reorder, or
+   right‑click a card to add it to your favorites.
+4. Use the titlebar view‑toggle button to switch list/grid, and the **↕** button
+   to turn broadcast‑time sorting on and off.
+5. Use the **⋯** menu for always‑on‑top, hiding offline channels, removing all
+   channels, import/export, and manual update checks. Adjust opacity and UI
+   scale from the footer.
 
 ## Development
 
