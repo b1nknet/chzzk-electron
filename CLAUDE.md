@@ -53,3 +53,7 @@ Three processes, classic Electron split with context isolation:
 - CommonJS (`require`), not ESM.
 - User-facing strings are Korean; match that when adding UI text.
 - When adding a renderer↔main capability, add the `ipcMain` handler in `main.js` **and** the matching method in `preload.js`'s `window.chzzk` bridge — the renderer never touches `ipcRenderer` directly.
+
+## Working with this repo
+
+- Actively use subagents whenever they fit the task — e.g. dispatch read-only exploration/search to an `Explore` agent, hand multi-step research to a `general-purpose` agent, and run git/`gh` commands through the Haiku git subagent. Reaching for the right subagent keeps the main thread focused and is the preferred default, not a last resort.
